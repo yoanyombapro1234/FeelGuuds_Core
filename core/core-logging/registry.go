@@ -20,9 +20,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/go-logr/logr"
-
-	json "github.com/yoanyombapro1234/FeelGuuds_Core/cores/core-logging/json"
+	json "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-logging/json"
 )
 
 const (
@@ -33,20 +31,20 @@ var logRegistry = NewLogFormatRegistry()
 
 // LogFormatRegistry store klog format registry
 type LogFormatRegistry struct {
-	registry map[string]logr.Logger
+	registry map[string]*json.ZapLogger
 	frozen   bool
 }
 
 // NewLogFormatRegistry return new init LogFormatRegistry struct
 func NewLogFormatRegistry() *LogFormatRegistry {
 	return &LogFormatRegistry{
-		registry: make(map[string]logr.Logger),
+		registry: make(map[string]*json.ZapLogger),
 		frozen:   false,
 	}
 }
 
 // Register new log format registry to global logRegistry
-func (lfr *LogFormatRegistry) Register(name string, logger logr.Logger) error {
+func (lfr *LogFormatRegistry) Register(name string, logger *json.ZapLogger) error {
 	if lfr.frozen {
 		return fmt.Errorf("log format is frozen, unable to register log format")
 	}
@@ -58,7 +56,7 @@ func (lfr *LogFormatRegistry) Register(name string, logger logr.Logger) error {
 }
 
 // Get specified log format logger
-func (lfr *LogFormatRegistry) Get(name string) (logr.Logger, error) {
+func (lfr *LogFormatRegistry) Get(name string) (*json.ZapLogger, error) {
 	re, ok := lfr.registry[name]
 	if !ok {
 		return nil, fmt.Errorf("log format: %s does not exists", name)
@@ -67,7 +65,7 @@ func (lfr *LogFormatRegistry) Get(name string) (logr.Logger, error) {
 }
 
 // Set specified log format logger
-func (lfr *LogFormatRegistry) Set(name string, logger logr.Logger) error {
+func (lfr *LogFormatRegistry) Set(name string, logger *json.ZapLogger) error {
 	if lfr.frozen {
 		return fmt.Errorf("log format is frozen, unable to set log format")
 	}
