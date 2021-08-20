@@ -21,7 +21,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-logr/logr"
 	"github.com/opentracing/opentracing-go"
 	tag "github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
@@ -90,7 +89,6 @@ const (
 
 // ZapLogger is a logr.Logger that uses Zap to record log.
 type ZapLogger struct {
-	logr.Logger
 	// NB: this looks very similar to zap.SugaredLogger, but
 	// deals with our desire to have multiple verbosity levels.
 	l   *zap.Logger
