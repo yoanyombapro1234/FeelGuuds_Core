@@ -24,7 +24,7 @@ import (
 
 	apimachineryversion "k8s.io/apimachinery/pkg/version"
 
-	metrics "github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-metrics"
+	metrics "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-metrics"
 )
 
 // CollectAndCompare registers the provided Collector with a newly created

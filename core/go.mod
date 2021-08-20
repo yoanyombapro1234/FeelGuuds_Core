@@ -16,8 +16,6 @@ require (
 	github.com/prometheus/procfs v0.7.3
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.7.0
-	github.com/yoanyombapro1234/FeelGuuds/src/libraries/core v0.0.0-20210709020011-dda80a19dd3b
-	github.com/yoanyombapro1234/FeelGuuds_Core v0.0.0-20210820073610-fae80d113265 // indirect
 	google.golang.org/genproto v0.0.0-20210820002220-43fce44e7af1
 	k8s.io/apimachinery v0.22.1
 	k8s.io/component-base v0.22.1
