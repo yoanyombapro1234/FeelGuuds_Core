@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
-	core_auth_sdk "github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-auth-sdk"
-	core_logging "github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-logging/json"
+	core_auth_sdk "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-auth-sdk"
+	core_logging "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-logging/json"
 )
 
 type contextKey struct {
