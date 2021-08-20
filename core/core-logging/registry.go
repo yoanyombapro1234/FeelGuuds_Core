@@ -22,7 +22,7 @@ import (
 
 	"github.com/go-logr/logr"
 
-	json "github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-logging/json"
+	json "github.com/yoanyombapro1234/FeelGuuds_Core/cores/core-logging/json"
 )
 
 const (

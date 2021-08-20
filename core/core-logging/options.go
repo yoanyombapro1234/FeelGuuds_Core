@@ -26,7 +26,7 @@ import (
 	"github.com/spf13/pflag"
 	"k8s.io/klog/v2"
 
-	"github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-logging/sanitization"
+	"github.com/yoanyombapro1234/FeelGuuds_Core/core/core-logging/sanitization"
 )
 
 const (

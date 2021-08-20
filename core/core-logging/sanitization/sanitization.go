@@ -19,7 +19,7 @@ package sanitization
 import (
 	"fmt"
 
-	"github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-logging/datapol"
+	"github.com/yoanyombapro1234/FeelGuuds_Core/core/core-logging/datapol"
 )
 
 const (
