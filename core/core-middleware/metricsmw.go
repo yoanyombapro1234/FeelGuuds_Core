@@ -11,8 +11,8 @@ import (
 	"strings"
 	"time"
 
-	core_metrics "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-metrics"
 	"github.com/gorilla/mux"
+	core_metrics "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-metrics"
 )
 
 type PrometheusMiddleware struct {

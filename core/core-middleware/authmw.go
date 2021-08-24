@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	core_auth_sdk "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-auth-sdk"
-	core_logging "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-logging/json"
+	"go.uber.org/zap"
 )
 
 type contextKey struct {
@@ -16,19 +16,20 @@ type contextKey struct {
 
 type AuthnMW struct {
 	client *core_auth_sdk.Client
-	logger core_logging.ILog
+	logger *zap.Logger
 }
 
 var ctxKey *contextKey
 
 // NewAuthnMw returns a new instance of the authentication middleware
-func NewAuthnMw(c *core_auth_sdk.Client, log core_logging.ILog, serviceName string) *AuthnMW {
+func NewAuthnMw(c *core_auth_sdk.Client, logger *zap.Logger, serviceName string) (*AuthnMW, error) {
 	if serviceName == "" {
 		panic("service name should be provided")
 	}
 
 	ctxKey = &contextKey{serviceName}
-	return &AuthnMW{client: c, logger: log}
+
+	return &AuthnMW{client: c, logger: logger}, nil
 }
 
 // AuthenticationMiddleware wraps the authentication middleware around an http call
@@ -42,7 +43,7 @@ func (mw *AuthnMW) AuthenticationMiddleware(next http.Handler) http.Handler {
 		token := strings.TrimPrefix(authorization, "Bearer ")
 		decodedToken, err := mw.client.SubjectFrom(token)
 		if err != nil {
-			mw.logger.Error(err, "error")
+			mw.logger.Error(err.Error())
 			next.ServeHTTP(w, r)
 			return
 		}

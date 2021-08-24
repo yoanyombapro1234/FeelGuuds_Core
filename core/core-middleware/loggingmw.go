@@ -3,27 +3,28 @@ package middleware
 import (
 	"net/http"
 
-	core_logging "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-logging/json"
+	"go.uber.org/zap"
 )
 
 type LoggingMiddleware struct {
+	logger *zap.Logger
 }
 
 // NewLoggingMiddleware returns a new instance of the logging middleware
-func NewLoggingMiddleware() *LoggingMiddleware {
-	return &LoggingMiddleware{}
+func NewLoggingMiddleware(logger *zap.Logger) *LoggingMiddleware {
+	return &LoggingMiddleware{logger: logger}
 }
 
 // LoggingMiddleware runs the logging middleware
 func (m *LoggingMiddleware) LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		core_logging.JSONLogger.Info(
+		m.logger.Info(
 			"request started",
-			"proto", r.Proto,
-			"uri", r.RequestURI,
-			"method", r.Method,
-			"remote", r.RemoteAddr,
-			"user-agent", r.UserAgent(),
+			zap.Any("proto", r.Proto),
+			zap.Any("uri", r.RequestURI),
+				zap.Any("method", r.Method),
+					zap.Any("remote", r.RemoteAddr),
+						zap.Any("user-agent", r.UserAgent()),
 		)
 		next.ServeHTTP(w, r)
 	})
