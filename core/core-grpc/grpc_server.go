@@ -2,11 +2,15 @@ package core_grpc
 
 import (
 	"crypto/tls"
+	"time"
 
 	"github.com/apssouza22/grpc-production-go/grpcutils"
 	grpcserver "github.com/apssouza22/grpc-production-go/server"
+	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
+	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	tlscert "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-tlsCert"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 )
 
@@ -20,7 +24,7 @@ type GrpcServer struct {
 func NewGrpcService(addr string, logger *zap.Logger, enableTls bool, cert *tls.Certificate) *GrpcServer {
 	serverBuilder := grpcserver.GrpcServerBuilder{}
 
-	addInterceptors(&serverBuilder)
+	addInterceptors(&serverBuilder, logger)
 	serverBuilder.EnableReflection(true)
 
 	if enableTls {
@@ -65,7 +69,21 @@ func (grpcSrvInstance *GrpcServer) awaitTermination() {
 }
 
 // addInterceptors adds default rpc interceptors to grpc service instance
-func addInterceptors(s *grpcserver.GrpcServerBuilder) {
-	s.SetUnaryInterceptors(grpcutils.GetDefaultUnaryServerInterceptors())
-	s.SetStreamInterceptors(grpcutils.GetDefaultStreamServerInterceptors())
+func addInterceptors(s *grpcserver.GrpcServerBuilder, logger *zap.Logger) {
+	var grpcUnaryInterceptors []grpc.UnaryServerInterceptor = grpcutils.GetDefaultUnaryServerInterceptors()
+	var grpcStreamInterceptors []grpc.StreamServerInterceptor = grpcutils.GetDefaultStreamServerInterceptors()
+
+	opts := []grpc_zap.Option{
+		grpc_zap.WithDurationField(func(duration time.Duration) zapcore.Field {
+			return zap.Int64("grpc.time_ns", duration.Nanoseconds())
+		}),
+	}
+
+	grpcUnaryInterceptors = append(grpcUnaryInterceptors, grpc_zap.UnaryServerInterceptor(logger, opts...),
+		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)))
+	grpcStreamInterceptors = append(grpcStreamInterceptors, grpc_zap.StreamServerInterceptor(logger, opts...),
+		grpc_ctxtags.StreamServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)))
+
+	s.SetUnaryInterceptors(grpcUnaryInterceptors)
+	s.SetStreamInterceptors(grpcStreamInterceptors)
 }

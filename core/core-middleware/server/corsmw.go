@@ -1,15 +1,15 @@
-package middleware
+package server
 
 import (
 	"net/http"
 )
 
-type CorsMw struct {
+type CorsMiddleware struct {
 	origin string
 }
 
-// NewCorsMw returns a new instance of the cors middleware
-func NewCorsMw(origins []string) *CorsMw {
+// NewCorsMiddleware returns a new instance of the cors middleware
+func NewCorsMiddleware(origins []string) *CorsMiddleware {
 	var origin = ""
 	if len(origins) == 0 {
 		origin = "*"
@@ -23,11 +23,11 @@ func NewCorsMw(origins []string) *CorsMw {
 		}
 	}
 
-	return &CorsMw{origin: origin}
+	return &CorsMiddleware{origin: origin}
 }
 
-// CorsMiddleware runs the Cors middleware
-func (c *CorsMw) CorsMiddleware(next http.Handler) http.Handler {
+// Handler runs a Cors middleware for http calls
+func (c *CorsMiddleware) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", c.origin)
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")

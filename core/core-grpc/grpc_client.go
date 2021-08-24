@@ -7,9 +7,11 @@ import (
 
 	grpcclient "github.com/apssouza22/grpc-production-go/client"
 	"github.com/apssouza22/grpc-production-go/grpcutils"
+	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
 	tlscert "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-tlsCert"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/health/grpc_health_v1"
 	"google.golang.org/grpc/metadata"
 )
@@ -36,8 +38,7 @@ func (grpcClientInstance *GrpcClient) NewGrpcClient(addr string, logger *zap.Log
 		}
 	}
 
-	clientBuilder.WithStreamInterceptors(grpcutils.GetDefaultStreamClientInterceptors())
-	clientBuilder.WithUnaryInterceptors(grpcutils.GetDefaultUnaryClientInterceptors())
+	ConfigureClientGrpcMiddlewares(&clientBuilder)
 	cc, err := clientBuilder.GetConn(addr)
 	if err != nil {
 		logger.Fatal(err.Error())
@@ -78,4 +79,21 @@ func (grpcClientInstance *GrpcClient) SendRpcRequest(ctx context.Context, ctxPai
 	grpcClientInstance.Logger.Info("successfully obtained response from rpc server", zap.Any("Response", rpcResponse))
 
 	return rpcResponse, err
+}
+
+func ConfigureClientGrpcMiddlewares(builder *grpcclient.GrpcConnBuilder) {
+	grpcUnaryInterceptors := grpcutils.GetDefaultUnaryClientInterceptors()
+	grpcStreamInterceptors := grpcutils.GetDefaultStreamClientInterceptors()
+
+	opts := []grpc_retry.CallOption{
+		grpc_retry.WithBackoff(grpc_retry.BackoffExponential(20 * time.Millisecond)),
+		grpc_retry.WithPerRetryTimeout(300 * time.Millisecond),
+		grpc_retry.WithMax(3),
+		grpc_retry.WithCodes(codes.NotFound, codes.Aborted, codes.Unknown, codes.Unavailable),
+	}
+
+	grpcUnaryInterceptors = append(grpcUnaryInterceptors, grpc_retry.UnaryClientInterceptor(opts...))
+	grpcStreamInterceptors = append(grpcStreamInterceptors, grpc_retry.StreamClientInterceptor(opts...))
+	builder.WithStreamInterceptors(grpcStreamInterceptors)
+	builder.WithUnaryInterceptors(grpcUnaryInterceptors)
 }

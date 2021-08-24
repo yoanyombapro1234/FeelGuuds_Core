@@ -1,9 +1,10 @@
-package middleware
+package server
 
 import (
 	"bufio"
 	"fmt"
 	"io"
+	"log"
 	"net"
 	"net/http"
 	"regexp"
@@ -11,25 +12,35 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DataDog/datadog-go/statsd"
 	"github.com/gorilla/mux"
-	core_metrics "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-metrics"
+	"go.uber.org/zap"
 )
 
-type PrometheusMiddleware struct {
-	Histogram *core_metrics.HistogramVec
-	Counter   *core_metrics.CounterVec
+type MetricsMiddleware struct {
+	MetricClient *statsd.Client
+	Logger *zap.Logger
 }
 
-// NewPrometheusMiddleware returns an instance of the middleware object
-func NewPrometheusMiddleware(h *core_metrics.HistogramVec, c *core_metrics.CounterVec) *PrometheusMiddleware {
-	return &PrometheusMiddleware{
-		Histogram: h,
-		Counter:   c,
+// NewMetricsMiddleware returns an instance of the middleware object
+func NewMetricsMiddleware(addr string, logger *zap.Logger) *MetricsMiddleware {
+	statsd, err := statsd.New(addr)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	if logger == nil {
+		log.Fatal("invalid input argument. Logger cannot be nil")
+	}
+
+	return &MetricsMiddleware{
+		MetricClient: statsd,
+		Logger: logger,
 	}
 }
 
-// MetricsMiddleware returns HTTP requests duration and Go runtime metrics
-func (p *PrometheusMiddleware) MetricsMiddleware(next http.Handler) http.Handler {
+// Handler returns HTTP requests duration and Go runtime metrics
+func (p *MetricsMiddleware) Handler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		begin := time.Now()
 		interceptor := &interceptor{ResponseWriter: w, statusCode: http.StatusOK}
@@ -39,13 +50,29 @@ func (p *PrometheusMiddleware) MetricsMiddleware(next http.Handler) http.Handler
 			status = strconv.Itoa(interceptor.statusCode)
 			took   = time.Since(begin)
 		)
-		p.Histogram.WithLabelValues(r.Method, path, status).Observe(took.Seconds())
-		p.Counter.WithLabelValues(path, status).Inc()
+
+		if p.updateCounters(took, r, path, status) {
+			return
+		}
 	})
 }
 
+// updateCounters updates counters tied to the request object
+func (p *MetricsMiddleware) updateCounters(took time.Duration, r *http.Request, path string, status string) bool {
+	if err := p.MetricClient.Histogram("request_latency.histogram", took.Seconds(), []string{
+		r.Method, path, status,
+	}, 1); err != nil {
+		return true
+	}
+
+	if err := p.MetricClient.Incr("request_path_of_execution.increment", []string{path, status}, 1); err != nil {
+		return true
+	}
+	return false
+}
+
 // converts gorilla mux routes from '/api/delay/{wait}' to 'api_delay_wait'
-func (p *PrometheusMiddleware) getRouteName(r *http.Request) string {
+func (p *MetricsMiddleware) getRouteName(r *http.Request) string {
 	if mux.CurrentRoute(r) != nil {
 		if name := mux.CurrentRoute(r).GetName(); len(name) > 0 {
 			return urlToLabel(name)
