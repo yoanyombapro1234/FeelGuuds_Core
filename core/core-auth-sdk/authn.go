@@ -82,12 +82,38 @@ func (ac *Client) SubjectFromWithAudience(idToken string, audience jwt.Audience)
 	return ac.subjectFromVerifier(idToken, verifier)
 }
 
+// ClaimsFrom will return all verified claims inside the given idToken
+// if and only if the token is a valid JWT that passes all
+// verification requirements. If the JWT does not verify, the returned
+// error will explain why. This is for debugging purposes.
+func (ac *Client) ClaimsFrom(idToken string) (*jwt.Claims, error) {
+	return ac.claimsFromVerifier(idToken, ac.verifier)
+}
+
+// ClaimsFromWithAudience works like ClaimsFrom but allows
+// specifying a different JWT audience.
+func (ac *Client) ClaimsFromWithAudience(idToken string, audience jwt.Audience) (*jwt.Claims, error) {
+	verifier, err := newIDTokenVerifierWithAudiences(ac.config.Issuer, audience, ac.kchain)
+	if err != nil {
+		return nil, err
+	}
+	return ac.claimsFromVerifier(idToken, verifier)
+}
+
 func (ac *Client) subjectFromVerifier(idToken string, verifier JWTClaimsExtractor) (string, error) {
 	claims, err := verifier.GetVerifiedClaims(idToken)
 	if err != nil {
 		return "", err
 	}
 	return claims.Subject, nil
+}
+
+func (ac *Client) claimsFromVerifier(idToken string, verifier JWTClaimsExtractor) (*jwt.Claims, error) {
+	claims, err := verifier.GetVerifiedClaims(idToken)
+	if err != nil {
+		return nil, err
+	}
+	return claims, nil
 }
 
 // GetAccount gets the account with the associated id
