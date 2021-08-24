@@ -2,15 +2,11 @@ package core_grpc
 
 import (
 	"crypto/tls"
-	"time"
 
-	"github.com/apssouza22/grpc-production-go/grpcutils"
 	grpcserver "github.com/apssouza22/grpc-production-go/server"
-	grpc_zap "github.com/grpc-ecosystem/go-grpc-middleware/logging/zap"
-	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
+	"github.com/yoanyombapro1234/FeelGuuds_Core/core/core-middleware/server"
 	tlscert "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-tlsCert"
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 )
 
@@ -20,24 +16,32 @@ type GrpcServer struct {
 	Address string
 }
 
+type GrpcServerConfigurations struct {
+	GrpcServerConnectionAddr string
+	Certificate *tls.Certificate
+	Logger *zap.Logger
+	ServiceConfigs *server.Configurations
+	EnableTls bool
+}
+
 // NewGrpcService Initializes a new instance of a grpc service
-func NewGrpcService(addr string, logger *zap.Logger, enableTls bool, cert *tls.Certificate) *GrpcServer {
+func NewGrpcService(c *GrpcServerConfigurations) *GrpcServer {
 	serverBuilder := grpcserver.GrpcServerBuilder{}
 
-	addInterceptors(&serverBuilder, logger)
+	addInterceptors(&serverBuilder, c.ServiceConfigs)
 	serverBuilder.EnableReflection(true)
 
-	if enableTls {
-		if cert != nil {
+	if c.EnableTls {
+		if c.Certificate != nil {
 			serverBuilder.SetTlsCert(&tlscert.Cert)
 		} else {
-			serverBuilder.SetTlsCert(cert)
+			serverBuilder.SetTlsCert(c.Certificate)
 		}
 	}
 
 	s := serverBuilder.Build()
 
-	return &GrpcServer{Address: addr, Logger: logger, Server: s}
+	return &GrpcServer{Address: c.GrpcServerConnectionAddr, Logger: c.Logger, Server: s}
 }
 
 // StartGrpcServer starts a grpc service
@@ -69,21 +73,8 @@ func (grpcSrvInstance *GrpcServer) awaitTermination() {
 }
 
 // addInterceptors adds default rpc interceptors to grpc service instance
-func addInterceptors(s *grpcserver.GrpcServerBuilder, logger *zap.Logger) {
-	var grpcUnaryInterceptors []grpc.UnaryServerInterceptor = grpcutils.GetDefaultUnaryServerInterceptors()
-	var grpcStreamInterceptors []grpc.StreamServerInterceptor = grpcutils.GetDefaultStreamServerInterceptors()
-
-	opts := []grpc_zap.Option{
-		grpc_zap.WithDurationField(func(duration time.Duration) zapcore.Field {
-			return zap.Int64("grpc.time_ns", duration.Nanoseconds())
-		}),
-	}
-
-	grpcUnaryInterceptors = append(grpcUnaryInterceptors, grpc_zap.UnaryServerInterceptor(logger, opts...),
-		grpc_ctxtags.UnaryServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)))
-	grpcStreamInterceptors = append(grpcStreamInterceptors, grpc_zap.StreamServerInterceptor(logger, opts...),
-		grpc_ctxtags.StreamServerInterceptor(grpc_ctxtags.WithFieldExtractor(grpc_ctxtags.CodeGenRequestFieldExtractor)))
-
-	s.SetUnaryInterceptors(grpcUnaryInterceptors)
-	s.SetStreamInterceptors(grpcStreamInterceptors)
+func addInterceptors(s *grpcserver.GrpcServerBuilder, configurations *server.Configurations) {
+	mw := server.InitializeMiddleware(configurations)
+	s.SetUnaryInterceptors(mw.UnaryInterceptor())
+	s.SetStreamInterceptors(mw.StreamInterceptor())
 }

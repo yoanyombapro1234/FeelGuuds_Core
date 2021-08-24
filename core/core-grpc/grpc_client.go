@@ -3,11 +3,13 @@ package core_grpc
 import (
 	"context"
 	"crypto/x509"
+	"log"
 	"time"
 
 	grpcclient "github.com/apssouza22/grpc-production-go/client"
 	"github.com/apssouza22/grpc-production-go/grpcutils"
 	grpc_retry "github.com/grpc-ecosystem/go-grpc-middleware/retry"
+	"github.com/yoanyombapro1234/FeelGuuds_Core/core/core-middleware/server"
 	tlscert "github.com/yoanyombapro1234/FeelGuuds_Core/core/core-tlsCert"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -21,31 +23,41 @@ type GrpcClient struct {
 	Conn   *grpc.ClientConn
 }
 
+type GrpcClientConfigurations struct {
+	GrpcServerConnectionAddr string
+	Certificate *x509.CertPool
+	Logger *zap.Logger
+	ServiceConfigs *server.Configurations
+	EnableTls bool
+}
+
+
 // NewGrpcClient initializes a new GRPC client connection
 // usage:
-//  gc := NewGrpcClient(addr string, logger *zap.Logger, tlsEnabled bool, cert *x509.CertPool)
+//  gc := NewGrpcClient(c *GrpcClientConfigurations)
 // defer gc.Conn.Close()
 //
-func (grpcClientInstance *GrpcClient) NewGrpcClient(addr string, logger *zap.Logger, tlsEnabled bool, cert *x509.CertPool) *GrpcClient {
+func (grpcClientInstance *GrpcClient) NewGrpcClient(c *GrpcClientConfigurations) *GrpcClient {
 	clientBuilder := grpcclient.GrpcConnBuilder{}
 	clientBuilder.WithInsecure()
 	clientBuilder.WithContext(context.Background())
-	if tlsEnabled {
-		if cert != nil {
-			clientBuilder.WithClientTransportCredentials(false, cert)
+	if c.EnableTls {
+		if c.Certificate != nil {
+			clientBuilder.WithClientTransportCredentials(false, c.Certificate)
 		} else {
 			clientBuilder.WithClientTransportCredentials(false, tlscert.CertPool)
 		}
 	}
 
-	ConfigureClientGrpcMiddlewares(&clientBuilder)
-	cc, err := clientBuilder.GetConn(addr)
+	cc, err := clientBuilder.GetConn(c.GrpcServerConnectionAddr)
 	if err != nil {
-		logger.Fatal(err.Error())
+		log.Fatal(err.Error())
 	}
 
+	ConfigureClientGrpcMiddlewares(&clientBuilder)
+
 	return &GrpcClient{
-		Logger: logger,
+		Logger: c.Logger,
 		Conn:   cc,
 	}
 }
