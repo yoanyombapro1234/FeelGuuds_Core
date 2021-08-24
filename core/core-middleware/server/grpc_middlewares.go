@@ -31,6 +31,7 @@ type ServiceMiddlewares struct {
 	RandomDelayMiddleware *RandomDelayMiddleware
 	RandomErrMiddleware *RandomErrMiddleware
 	VersionMiddleware *VersionMiddleware
+	TracingMiddleware *TracingMiddleware
 }
 
 // InitializeMiddleware initializes a middleware object ecompassing every middleware in this library
@@ -45,6 +46,7 @@ func InitializeMiddleware(c *Configurations) *ServiceMiddlewares{
 	serviceMw.LoggingMiddleware = NewLoggingMiddleware(c.Logger)
 	serviceMw.MetricsMiddleware = NewMetricsMiddleware(c.StatsDConnectionAddr, c.Logger)
 	serviceMw.VersionMiddleware = NewVersionMw(c.Version)
+	serviceMw.TracingMiddleware = NewTracingMiddleware(c.ServiceName)
 
 	if c.EnableRandomErrorMiddleware {
 		serviceMw.RandomErrMiddleware = NewRandomErrMiddleware(c.Logger)
@@ -63,7 +65,8 @@ func (m *ServiceMiddlewares) StreamInterceptor() []grpc.StreamServerInterceptor 
 	streamInterceptors = append(streamInterceptors,
 								m.AuthenticationMiddleware.StreamInterceptor(),
 								m.LoggingMiddleware.StreamInterceptor(),
-								m.VersionMiddleware.StreamInterceptor())
+								m.VersionMiddleware.StreamInterceptor(),
+								m.TracingMiddleware.StreamInterceptor())
 
 	if m.RandomDelayMiddleware != nil {
 		streamInterceptors = append(streamInterceptors, m.RandomDelayMiddleware.StreamInterceptor())
@@ -82,7 +85,8 @@ func (m *ServiceMiddlewares) UnaryInterceptor() []grpc.UnaryServerInterceptor {
 	unaryInterceptors = append(unaryInterceptors,
 		m.AuthenticationMiddleware.UnaryInterceptor(),
 		m.LoggingMiddleware.UnaryInterceptor(),
-		m.VersionMiddleware.UnaryInterceptor())
+		m.VersionMiddleware.UnaryInterceptor(),
+		m.TracingMiddleware.UnaryInterceptor())
 
 	if m.RandomDelayMiddleware != nil {
 		unaryInterceptors = append(unaryInterceptors, m.RandomDelayMiddleware.UnaryInterceptor())

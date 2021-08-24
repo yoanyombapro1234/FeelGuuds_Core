@@ -28,8 +28,8 @@ func NewProductionLogger() *LoggerInstance {
 }
 
 
-// NewProductionLogger creates a logger instance of a logger object
-func NewLogger(logLevel string) *LoggerInstance {
+// New creates a logger instance of a logger object
+func New(logLevel string) *LoggerInstance {
 	var logger *zap.Logger
 
 	logger, _ = initZap(logLevel)

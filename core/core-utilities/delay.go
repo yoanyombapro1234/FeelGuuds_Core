@@ -1,4 +1,4 @@
-package core_delay
+package core_utilities
 
 import (
 	"math"

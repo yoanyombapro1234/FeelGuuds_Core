@@ -1,4 +1,4 @@
-package core_delay
+package core_utilities
 
 import (
 	"bytes"
@@ -16,7 +16,7 @@ func HandleError(w http.ResponseWriter, err error, statusCode int) bool {
 	return true
 }
 
-func JSONResponse(w http.ResponseWriter, r *http.Request, result interface{}) {
+func JSONResponse(w http.ResponseWriter, result interface{}) {
 	body, err := json.Marshal(result)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -29,7 +29,7 @@ func JSONResponse(w http.ResponseWriter, r *http.Request, result interface{}) {
 	w.Write(prettyJSON(body))
 }
 
-func JSONResponseCode(w http.ResponseWriter, r *http.Request, result interface{}, responseCode int) {
+func JSONResponseCode(w http.ResponseWriter, result interface{}, responseCode int) {
 	body, err := json.Marshal(result)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -42,7 +42,7 @@ func JSONResponseCode(w http.ResponseWriter, r *http.Request, result interface{}
 	w.Write(prettyJSON(body))
 }
 
-func ErrorResponse(w http.ResponseWriter, r *http.Request, error string, code int) {
+func ErrorResponse(w http.ResponseWriter, error string, code int) {
 	data := struct {
 		Code    int    `json:"code"`
 		Message string `json:"message"`
