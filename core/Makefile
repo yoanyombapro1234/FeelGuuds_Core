@@ -21,22 +21,22 @@ contracts:
 run-tests:
 	@echo "running core-library tests"
 	@echo "----- running core-metrics tests"
-	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-metrics
+	cd ./core-metrics && go test && cd ..
 	@echo "running core-library tests"
 	@echo "----- running core-logging tests"
-	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-logging
+	cd ./core-logging && go test && cd ..
 	@echo "----- running core-auth-sdk tests"
-	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-auth-sdk
+	cd ./core-auth-sdk && go test && cd ..
 	@echo "----- running core-grpc tests"
-	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-grpc
+	cd ./core-grpc && go test && cd ..
 	@echo "----- running core-middleware tests"
-	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-middleware
+	cd ./core-middleware/server && go test && cd ../..
 	@echo "----- running core-pool tests"
-	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-pool
+	cd ./core-pool && go test && cd ..
 	@echo "----- running core-tlsCert tests"
-	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-tlsCert
+	cd ./core-tlsCert && go test && cd ..
 	@echo "----- running core-tracing tests"
-	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-tracing/datadog
-	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-tracing/jaeger
+	cd ./core-tracing/datadog && go test && cd ../..
+	cd ./core-tracing/jaeger && go test && cd ../..
 	@echo "----- running core-utilities tests"
-	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-utilities
+	cd ./core-utilities && go test && cd ..

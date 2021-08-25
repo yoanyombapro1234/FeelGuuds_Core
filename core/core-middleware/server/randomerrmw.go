@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/grpc/grpc-go/status"
+	"google.golang.org/grpc/status"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
