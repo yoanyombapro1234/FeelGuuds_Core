@@ -18,18 +18,25 @@ contracts:
     			-I=$(GOPATH)/src \
     			--go_out=plugins=grpc:./schema/models/ ./schema/proto/contracts/*.proto
 
-run-tests: run-metrics-tests run-logging-tests run-core-auth-sdk-tests
-
-run-metrics-tests:
+run-tests:
 	@echo "running core-library tests"
 	@echo "----- running core-metrics tests"
 	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-metrics
-
-run-logging-tests:
 	@echo "running core-library tests"
 	@echo "----- running core-logging tests"
 	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-logging
-
-run-core-auth-sdk-tests:
 	@echo "----- running core-auth-sdk tests"
 	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-auth-sdk
+	@echo "----- running core-grpc tests"
+	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-grpc
+	@echo "----- running core-middleware tests"
+	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-middleware
+	@echo "----- running core-pool tests"
+	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-pool
+	@echo "----- running core-tlsCert tests"
+	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-tlsCert
+	@echo "----- running core-tracing tests"
+	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-tracing/datadog
+	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-tracing/jaeger
+	@echo "----- running core-utilities tests"
+	go test github.com/yoanyombapro1234/FeelGuuds/src/libraries/core/core-utilities
