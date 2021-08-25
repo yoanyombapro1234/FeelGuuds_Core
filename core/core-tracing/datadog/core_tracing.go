@@ -1,4 +1,4 @@
-package core_tracing
+package datadog
 
 import (
 	"context"
@@ -17,17 +17,17 @@ import (
 type OperationType string
 
 const (
-	GET_REQUEST OperationType = "GET"
-	PUT_REQUEST OperationType = "PUT"
+	GET_REQUEST    OperationType = "GET"
+	PUT_REQUEST    OperationType = "PUT"
 	DELETE_REQUEST OperationType = "DELETE"
-	POST_REQUEST OperationType = "POST"
+	POST_REQUEST   OperationType = "POST"
 )
 
 type HttpOperationArguments struct {
 	UrlEndpoint string
 	DecodedRequest interface{}
-	Operation OperationType
-	RequestBody io.Reader
+	Operation      OperationType
+	RequestBody    io.Reader
 }
 
 type TracingConfigurations struct {

@@ -1,3 +1,3 @@
-package core_tracing
+package datadog
 
 // TODO: add unit tests and integration tests
