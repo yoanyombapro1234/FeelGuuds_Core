@@ -11,12 +11,12 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/stretchr/testify v1.7.0 // indirect
+	github.com/yoanyombapro1234/FeelGuuds_Core/core v0.0.0-20210825232403-52875d3847ec // indirect
 	github.com/yoanyombapro1234/FeelGuuds_Core/core/core-tlsCert v0.0.0-20210820094025-9de7c9eac9df
 	go.uber.org/zap v1.16.0
 	golang.org/x/sys v0.0.0-20210603081109-ebe580a85c40 // indirect
 	google.golang.org/grpc v1.40.0
 	google.golang.org/grpc/examples v0.0.0-20210823233914-c361e9ea1646 // indirect
-	google.golang.org/protobuf v1.26.0-rc.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 )

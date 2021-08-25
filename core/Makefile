@@ -27,8 +27,6 @@ run-tests:
 	cd ./core-logging && go test && cd ..
 	@echo "----- running core-auth-sdk tests"
 	cd ./core-auth-sdk && go test && cd ..
-	@echo "----- running core-grpc tests"
-	cd ./core-grpc && go test && cd ..
 	@echo "----- running core-middleware tests"
 	cd ./core-middleware/server && go test && cd ../..
 	@echo "----- running core-pool tests"
@@ -40,3 +38,5 @@ run-tests:
 	cd ./core-tracing/jaeger && go test && cd ../..
 	@echo "----- running core-utilities tests"
 	cd ./core-utilities && go test && cd ..
+	@echo "----- running core-grpc tests"
+
